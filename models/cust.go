@@ -16,6 +16,8 @@ type Customer struct {
 	Name        string `gorm:"type:varchar(100);not null"`
 	NIK         string `gorm:"type:varchar(16);unique;not null"`
 	PhoneNumber string `gorm:"type:varchar(15);not null"`
+	MembershipID  uint      `json:"membership_id"`    
+	Membership   Membership  `json:"membership" gorm:"foreignKey:MembershipID"` // Tambahkan relasi
 }
 
 func MigrateCust(db *gorm.DB) {

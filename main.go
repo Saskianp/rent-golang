@@ -15,6 +15,10 @@ func main() {
 	models.MigrateCust(database.DB)  // Migrate untuk Customer
 	models.MigrateCar(database.DB)   // Migrate untuk Car
 	models.MigrateBooking(database.DB)   // Migrate untuk Booking
+	models.MigrateDriver(database.DB)   // Migrate untuk Driver
+	models.MigrateBookingType(database.DB)   // Migrate untuk BookingType
+	models.MigrateMembership(database.DB)   // Migrate untuk Membership
+	models.MigrateDriverIncentive(database.DB)   // Migrate untuk DriverIncentive
 
 	// Initialize repository, service, and controller untuk Customer
 	repoCust := repository.NewCustomerRepository(database.DB)
@@ -30,6 +34,27 @@ func main() {
 	repoBooking := repository.NewBookingRepository(database.DB)
 	serviceBooking := service.NewBookingService(repoBooking)
 	controllerBooking := controller.NewBookingController(serviceBooking)
+
+	// Initialize repository, service, and controller untuk Driver
+	repoDriver := repository.NewDriverRepository(database.DB)
+	serviceDriver := service.NewDriverService(repoDriver)
+	controllerDriver := controller.NewDriverController(serviceDriver)
+
+	// Initialize repository, service, and controller untuk BookingType
+	repoBookingType := repository.NewBookingTypeRepository(database.DB)
+	serviceBookingType := service.NewBookingTypeService(repoBookingType)
+	controllerBookingType := controller.NewBookingTypeController(serviceBookingType)
+
+	// Initialize repository, service, and controller untuk Membership
+	repoMembership := repository.NewMembershipRepository(database.DB)
+	serviceMembership := service.NewMembershipService(repoMembership)
+	controllerMembership := controller.NewMembershipController(serviceMembership)
+
+	// Initialize repository, service, and controller untuk DriverIncentive
+	repoDriverIncentive := repository.NewDriverIncentiveRepository(database.DB)
+	serviceDriverIncentive := service.NewDriverIncentiveService(repoDriverIncentive)
+	controllerDriverIncentive := controller.NewDriverIncentiveController(serviceDriverIncentive)
+
 
 	// Inisialisasi router
 	router := gin.Default()
@@ -54,6 +79,34 @@ func main() {
 	router.POST("/booking/create", controllerBooking.CreateBooking)
 	router.PUT("/booking/update", controllerBooking.UpdateBooking)
 	router.DELETE("/booking/delete", controllerBooking.DeleteBooking)
+
+	// Routes untuk Driver
+	router.GET("/drivers", controllerDriver.GetAll)
+	router.GET("/driver", controllerDriver.GetByID)
+	router.POST("/driver/create", controllerDriver.Create)
+	router.PUT("/driver/update", controllerDriver.Update)
+	router.DELETE("/driver/delete", controllerDriver.Delete)
+
+	// Routes untuk BookingType
+	router.GET("/bookingTypes", controllerBookingType.GetAll)
+	router.GET("/bookingType", controllerBookingType.GetByID)
+	router.POST("/bookingType/create", controllerBookingType.Create)
+	router.PUT("/bookingType/update", controllerBookingType.Update)
+	router.DELETE("/bookingType/delete", controllerBookingType.Delete)
+
+	// Routes untuk Membership
+	router.GET("/memberships", controllerMembership.GetAll)
+	router.GET("/membership", controllerMembership.GetByID)
+	router.POST("/membership/create", controllerMembership.Create)
+	router.PUT("/membership/update", controllerMembership.Update)
+	router.DELETE("/membership/delete", controllerMembership.Delete)
+
+	// Routes untuk DriverIncentive
+	router.GET("/driverIncentives", controllerDriverIncentive.GetAll)
+	router.GET("/driverIncentive", controllerDriverIncentive.GetByID)
+	router.POST("/driverIncentive/create", controllerDriverIncentive.Create)
+	router.PUT("/driverIncentive/update", controllerDriverIncentive.Update)
+	router.DELETE("/driverIncentive/delete", controllerDriverIncentive.Delete)
 
 	// Jalankan server di port 7070
 	router.Run(":7070")
