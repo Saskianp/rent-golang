@@ -12,12 +12,12 @@ package models
 import "gorm.io/gorm"
 
 type Customer struct {
-	ID          uint   `gorm:"primaryKey;autoIncrement"`
-	Name        string `gorm:"type:varchar(100);not null"`
-	NIK         string `gorm:"type:varchar(16);unique;not null"`
-	PhoneNumber string `gorm:"type:varchar(15);not null"`
-	MembershipID  uint      `json:"membership_id"`    
-	Membership   Membership  `json:"membership" gorm:"foreignKey:MembershipID"` // Tambahkan relasi
+	ID           uint       `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name         string     `gorm:"type:varchar(100);not null" json:"name"`
+	NIK          string     `gorm:"type:varchar(16);unique;not null" json:"nik"`
+	PhoneNumber  string     `gorm:"type:varchar(15);not null" json:"phone_number"`
+	MembershipID *uint      `json:"membership_id" gorm:"default:null"` // Bisa null jika customer tidak punya membership
+	Membership   Membership `json:"membership" gorm:"foreignKey:MembershipID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 func MigrateCust(db *gorm.DB) {

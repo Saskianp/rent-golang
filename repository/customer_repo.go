@@ -15,15 +15,16 @@ func NewCustomerRepository(db *gorm.DB) *CustomerRepository {
 
 func (r *CustomerRepository) GetAll() ([]models.Customer, error) {
 	var customers []models.Customer
-	err := r.DB.Find(&customers).Error
+	err := r.DB.Preload("Membership").Find(&customers).Error
 	return customers, err
 }
 
 func (r *CustomerRepository) GetByID(id uint) (models.Customer, error) {
 	var customer models.Customer
-	err := r.DB.First(&customer, id).Error
+	err := r.DB.Preload("Membership").First(&customer, id).Error
 	return customer, err
 }
+
 
 func (r *CustomerRepository) Create(customer *models.Customer) error {
 	return r.DB.Create(customer).Error

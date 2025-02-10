@@ -46,13 +46,13 @@ func (r *bookingRepository) CreateBooking(booking models.Booking) (models.Bookin
 
 func (r *bookingRepository) GetAllBookings() ([]models.Booking, error) {
     var bookings []models.Booking
-    err := r.db.Preload("Customer").Preload("Car").Find(&bookings).Error
+    err := r.db.Preload("Customer").Preload("Car").Preload("BookingType").Preload("Driver").Find(&bookings).Error
     return bookings, err
 }
 
 func (r *bookingRepository) GetBookingByID(id uint) (models.Booking, error) {
 	var booking models.Booking
-	err := r.db.Preload("Customer").Preload("Car").First(&booking, id).Error
+	err := r.db.Preload("Customer").Preload("Car").Preload("BookingType").Preload("Driver").Find(&booking, id).Error
 
 	// Cek jika data tidak ditemukan
 	if errors.Is(err, gorm.ErrRecordNotFound) {
