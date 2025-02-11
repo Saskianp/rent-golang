@@ -1,28 +1,4 @@
-// package models
-
-// import (
-// 	"time"
-
-// 	"gorm.io/gorm"
-// )
-
-// type Booking struct {
-// 	ID         uint      `json:"id" gorm:"primaryKey;autoIncrement"`
-// 	CustomerID uint      `json:"customer_id"`
-// 	Customer   Customer  `json:"customer" gorm:"foreignKey:CustomerID"` // Tambahkan relasi
-// 	CarID      uint      `json:"car_id"`
-// 	Car        Car       `json:"car" gorm:"foreignKey:CarID"` // Tambahkan relasi
-// 	StartRent  time.Time `json:"start_rent"`
-// 	EndRent    time.Time `json:"end_rent"`
-// 	TotalCost  float64   `json:"total_cost"` // Total cost yang dihitung otomatis
-// 	Finished   bool      `json:"finished"`
-// }
-
-// func MigrateBooking(db *gorm.DB) {
-// 	db.AutoMigrate(&Booking{})
-// }
-
-package models
+package models 
 
 import (
 	"time"
@@ -38,7 +14,7 @@ type Booking struct {
 	Car           Car         `json:"car" gorm:"foreignKey:CarID"`
 	StartRent     time.Time   `json:"start_rent"`
 	EndRent       time.Time   `json:"end_rent"`
-	TotalCost     float64     `json:"total_cost"` // Total cost yang dihitung otomatis
+	TotalCost     float64     `json:"total_cost"` // Total cost dihitung otomatis
 	Discount      float64     `json:"discount"`   // Diskon dari membership
 	BookingTypeID uint        `json:"booking_type_id"`
 	BookingType   BookingType `json:"booking_type" gorm:"foreignKey:BookingTypeID"`
@@ -48,7 +24,7 @@ type Booking struct {
 	Finished      bool        `json:"finished"`
 }
 
-// Function untuk menghitung TotalCost
+// Function untuk menghitung TotalCost, Discount, dan DriverCost
 func (b *Booking) CalculateTotalCost(db *gorm.DB) {
 	var car Car
 	var customer Customer
@@ -66,11 +42,14 @@ func (b *Booking) CalculateTotalCost(db *gorm.DB) {
 	}
 
 	// Ambil informasi customer dan membership
-	db.First(&customer, b.CustomerID)
-	db.First(&membership, customer.MembershipID)
+	db.Preload("Membership").First(&customer, b.CustomerID)
+	b.Customer = customer // Set customer agar Membership ikut terhubung
 
-	// Hitung diskon dari membership
-	b.Discount = pricePerDay * duration * (membership.Discount / 100)
+	// Jika customer memiliki membership, hitung diskon
+	if customer.MembershipID != nil {
+		db.First(&membership, *customer.MembershipID)
+		b.Discount = (pricePerDay * duration) * (membership.Discount / 100)
+	}
 
 	// Ambil biaya driver jika ada
 	if b.DriverID != nil {
@@ -78,10 +57,11 @@ func (b *Booking) CalculateTotalCost(db *gorm.DB) {
 		b.DriverCost = driver.DailyRent * duration
 	}
 
-	// Hitung total biaya
+	// Hitung total biaya (Total - Discount + DriverCost)
 	b.TotalCost = (pricePerDay * duration) - b.Discount + b.DriverCost
 }
 
+// Migration untuk Booking
 func MigrateBooking(db *gorm.DB) {
 	db.AutoMigrate(&Booking{})
 }

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"testBeGo/models"
 	"testBeGo/service"
 	"testBeGo/helper"
 	"net/http"
@@ -40,44 +39,6 @@ func (c *DriverIncentiveController) GetByID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, helper.SuccessfulResponse1(driverIncentive))
-}
-
-func (c *DriverIncentiveController) Create(ctx *gin.Context) {
-	var driverIncentive models.DriverIncentive
-	if err := ctx.ShouldBindJSON(&driverIncentive); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "Invalid input data", nil))
-		return
-	}
-
-	err := c.Service.CreateDriverIncentive(&driverIncentive)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse1(http.StatusInternalServerError, "Failed to create driverIncentives", nil))
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, helper.SuccessfulResponse1("DriverIncentive created successfully"))
-}
-
-func (c *DriverIncentiveController) Update(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Query("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "Invalid ID format", nil))
-		return
-	}
-
-	var driverIncentive models.DriverIncentive
-	if err := ctx.ShouldBindJSON(&driverIncentive); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "Invalid input data", nil))
-		return
-	}
-
-	err = c.Service.UpdateDriverIncentive(uint(id), &driverIncentive)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse1(http.StatusInternalServerError, "Failed to update driverIncentive", nil))
-		return
-	}
-
-	ctx.JSON(http.StatusOK, helper.SuccessfulResponse1("DriverIncentive updated successfully"))
 }
 
 func (c *DriverIncentiveController) Delete(ctx *gin.Context) {

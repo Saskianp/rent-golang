@@ -21,18 +21,26 @@ func NewBookingController(service service.BookingService) *BookingController {
 func (c *BookingController) CreateBooking(ctx *gin.Context) {
 	var booking models.Booking
 	if err := ctx.ShouldBindJSON(&booking); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "Invalid data", nil))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "Invalid data", err.Error()))
 		return
 	}
 
+	// Simpan booking ke database
 	createdBooking, err := c.service.CreateBooking(booking)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse1(http.StatusInternalServerError, "Failed to create booking", nil))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse1(http.StatusInternalServerError, "Failed to create booking", err.Error()))
 		return
 	}
 
-	// Ensure that the response includes the Customer and Car data
-	ctx.JSON(http.StatusOK, helper.SuccessfulResponse1(createdBooking))
+	// Ambil ulang data booking dengan preloading customer, car, booking type, dan driver
+	fullBooking, err := c.service.GetBookingByID(createdBooking.ID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse1(http.StatusInternalServerError, "Failed to retrieve booking details", err.Error()))
+		return
+	}
+
+	// Kirim respons dengan data lengkap
+	ctx.JSON(http.StatusOK, helper.SuccessfulResponse1(fullBooking))
 }
 
 func (c *BookingController) GetAllBookings(ctx *gin.Context) {
@@ -82,7 +90,7 @@ func (c *BookingController) UpdateBooking(ctx *gin.Context) {
 
 	// Jika ID kosong, return error
 	if idStr == "" {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "ID is required", nil))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse1(http.StatusBadRequest, "ID is required", ""))
 		return
 	}
 
@@ -106,8 +114,23 @@ func (c *BookingController) UpdateBooking(ctx *gin.Context) {
 		return
 	}
 
+	// Hapus nilai kosong sebelum dikembalikan dalam respons
+	if updatedBooking.Customer.ID == 0 {
+		updatedBooking.Customer = models.Customer{}
+	}
+	if updatedBooking.Car.ID == 0 {
+		updatedBooking.Car = models.Car{}
+	}
+	if updatedBooking.BookingType.ID == 0 {
+		updatedBooking.BookingType = models.BookingType{}
+	}
+	if updatedBooking.Driver != nil && updatedBooking.Driver.ID == 0 {
+		updatedBooking.Driver = nil
+	}
+
 	ctx.JSON(http.StatusOK, helper.SuccessfulResponse1(updatedBooking))
 }
+
 
 func (c *BookingController) DeleteBooking(ctx *gin.Context) {
 	// Ambil `id` dari path atau query parameter

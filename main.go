@@ -104,8 +104,6 @@ func main() {
 	// Routes untuk DriverIncentive
 	router.GET("/driverIncentives", controllerDriverIncentive.GetAll)
 	router.GET("/driverIncentive", controllerDriverIncentive.GetByID)
-	router.POST("/driverIncentive/create", controllerDriverIncentive.Create)
-	router.PUT("/driverIncentive/update", controllerDriverIncentive.Update)
 	router.DELETE("/driverIncentive/delete", controllerDriverIncentive.Delete)
 
 	// Jalankan server di port 7070
